@@ -2,7 +2,7 @@ const $ = selector => document.querySelector(selector);
 let nominees = [], categories = [], selected = null, activeFilter = 'All';
 const grid = $('#nomineeGrid'), filters = $('#filters'), votePanel = $('#vote'), voteForm = $('#voteForm'), quantity = $('#quantity'), total = $('#total');
 const esc = value => String(value).replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[char]);
-function setView(view) { const selectedView = ['vote', 'results', 'nominee'].includes(view) ? view : 'vote'; document.body.dataset.view = selectedView; document.querySelectorAll('.app-view').forEach(section => { section.hidden = section.id !== `${selectedView}-view`; }); document.querySelectorAll('[data-view-link]').forEach(link => link.classList.toggle('active', link.dataset.viewLink === selectedView)); window.scrollTo({ top: 0, behavior: 'instant' }); }
+function setView(view) { const selectedView = ['home', 'vote', 'results'].includes(view) ? view : 'home'; document.body.dataset.view = selectedView; document.querySelectorAll('.app-view').forEach(section => { section.hidden = section.id !== `${selectedView}-view`; }); document.querySelectorAll('[data-view-link]').forEach(link => link.classList.toggle('active', link.dataset.viewLink === selectedView)); window.scrollTo({ top: 0, behavior: 'auto' }); }
 document.querySelectorAll('[data-view-link]').forEach(link => link.addEventListener('click', event => { event.preventDefault(); const view = link.dataset.viewLink; history.pushState({}, '', `#${view}`); setView(view); }));
 window.addEventListener('hashchange', () => setView(location.hash.slice(1)));
 setView(location.hash.slice(1));
