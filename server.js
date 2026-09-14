@@ -9,6 +9,8 @@ const PUBLIC_URL = (process.env.PUBLIC_URL || `http://localhost:${PORT}`).replac
 const voteAttempts = new Map();
 const votes = [];
 const registrationSequence = { value: 34 };
+const MAX_PHOTO_BYTES = 500 * 1024 * 1024;
+const MAX_PHOTO_DATA_URL_LENGTH = Math.ceil(MAX_PHOTO_BYTES * 1.4);
 
 const categories = [
   'Student Leader of the Year',
@@ -45,7 +47,7 @@ function json(res, status, body) {
 function readBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
-    req.on('data', chunk => { data += chunk; if (data.length > 1e6) req.destroy(); });
+    req.on('data', chunk => { data += chunk; if (data.length > MAX_PHOTO_DATA_URL_LENGTH) req.destroy(); });
     req.on('end', () => { try { resolve(JSON.parse(data || '{}')); } catch { reject(new Error('Invalid request body')); } });
   });
 }
@@ -68,7 +70,7 @@ async function handleApi(req, res, url) {
   if (req.method === 'POST' && url.pathname === '/api/register') {
     const { name, email, category, photo } = await readBody(req);
     if (!name?.trim() || !/^\S+@\S+\.\S+$/.test(email || '') || !categories.includes(category)) return json(res, 400, { message: 'Please complete your name, email and category.' });
-    if (photo && (!photo.startsWith('data:image/') || photo.length > 800000)) return json(res, 400, { message: 'Please upload a JPG or PNG photo smaller than 500 KB.' });
+    if (photo && (!photo.startsWith('data:image/') || photo.length > MAX_PHOTO_DATA_URL_LENGTH)) return json(res, 400, { message: 'Please upload a JPG, PNG or WEBP photo smaller than 500 MB.' });
     const prefix = category.split(' ').map(word => word[0]).join('').slice(0, 3).toUpperCase();
     const code = `${prefix}-${String(++registrationSequence.value).padStart(3, '0')}`;
     nominees.push({ name: name.trim(), code, category, programme: 'ISTSA Student', photo: photo || `https://i.pravatar.cc/400?u=${encodeURIComponent(code)}` });
