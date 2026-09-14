@@ -8,7 +8,7 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PUBLIC_URL = (process.env.PUBLIC_URL || `http://localhost:${PORT}`).replace(/\/$/, '');
 const voteAttempts = new Map();
 const votes = [];
-const registrationSequence = { value: 34 };
+const registrationSequence = { value: 0 };
 const MAX_PHOTO_BYTES = 500 * 1024 * 1024;
 const MAX_PHOTO_DATA_URL_LENGTH = Math.ceil(MAX_PHOTO_BYTES * 1.4);
 
@@ -24,20 +24,7 @@ const categories = [
   'Most Active ISTSA Member',
   'Creative Media Personality'
 ];
-const nominees = [
-  { name: 'Ama Serwaa', code: 'SLY-014', category: categories[0], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=47' },
-  { name: 'Kofi Mensah', code: 'SLY-021', category: categories[0], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=12' },
-  { name: 'Naa Odoi', code: 'TIN-008', category: categories[1], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=32' },
-  { name: 'Kwesi Antwi', code: 'TIN-019', category: categories[1], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=68' },
-  { name: 'Fati Osman', code: 'MOS-006', category: categories[2], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=49' },
-  { name: 'Daniel Owusu', code: 'BDS-011', category: categories[3], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=53' },
-  { name: 'Esi Nyarko', code: 'ACA-024', category: categories[4], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=45' },
-  { name: 'Michael Badu', code: 'BPR-031', category: categories[5], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=14' },
-  { name: 'Abena Boateng', code: 'FTT-017', category: categories[6], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=44' },
-  { name: 'Richmond Asare', code: 'ENT-029', category: categories[7], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=60' },
-  { name: 'Akosua Owusu', code: 'AIM-022', category: categories[8], programme: 'BSc Information Systems', photo: 'https://i.pravatar.cc/400?img=48' },
-  { name: 'Emmanuel Tetteh', code: 'CMP-013', category: categories[9], programme: 'BSc Information Technology', photo: 'https://i.pravatar.cc/400?img=58' }
-];
+const nominees = [];
 function nomineeFor(category, code) { return nominees.find(n => n.category === category && n.code === code); }
 
 function json(res, status, body) {
@@ -73,7 +60,7 @@ async function handleApi(req, res, url) {
     if (photo && (!photo.startsWith('data:image/') || photo.length > MAX_PHOTO_DATA_URL_LENGTH)) return json(res, 400, { message: 'Please upload a JPG, PNG or WEBP photo smaller than 500 MB.' });
     const prefix = category.split(' ').map(word => word[0]).join('').slice(0, 3).toUpperCase();
     const code = `${prefix}-${String(++registrationSequence.value).padStart(3, '0')}`;
-    nominees.push({ name: name.trim(), code, category, programme: 'ISTSA Student', photo: photo || `https://i.pravatar.cc/400?u=${encodeURIComponent(code)}` });
+    nominees.push({ name: name.trim(), code, category, programme: 'ISTSA Student', photo: photo || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 400 400%22%3E%3Crect width=%22400%22 height=%22400%22 fill=%22%23edf4ff%22/%3E%3Ctext x=%22200%22 y=%22208%22 text-anchor=%22middle%22 font-family=%22Arial%22 font-size=%2228%22 fill=%22%23547096%22%3ENo photo%3C/text%3E%3C/svg%3E' });
     return json(res, 201, { message: 'Registration submitted successfully.', code });
   }
   if (req.method === 'POST' && url.pathname === '/api/initialize-payment') {
